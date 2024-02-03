@@ -177,7 +177,7 @@ class AGQATorchDataset(Dataset):
 
 
         # clip len == 16
-        with open(self.annotation_dir + '/trimmed_frame_ids.json', 'rb') as f:
+        with open('/kaggle/working/annotations/agqa_annotations/trimmed_frame_ids.json', 'rb') as f:
             self.frame_ids = pickle.load(f)
             f.close()
 
