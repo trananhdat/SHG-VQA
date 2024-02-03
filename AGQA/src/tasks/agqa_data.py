@@ -123,12 +123,12 @@ class AGQADataset:
 
 
         # load relationships for each frame
-        with open(annotation_dir + '/frameTriplets.json', 'rb') as f:
+        with open('/kaggle/working/annotations/agqa_annotations/frameTriplets.json', 'rb') as f:
             self.frameTriplets = pickle.load(f)
             f.close()
 
         # load actions for each frame
-        with open(annotation_dir + '/frameActions.json', 'rb') as f:
+        with open('/kaggle/working/annotations/agqa_annotations/frameActions.json', 'rb') as f:
             self.frameActions = pickle.load(f)
             f.close()
 
