@@ -64,7 +64,7 @@ class AGQADataset:
             else:
                 if split == 'train':
                     if not args.train_sub_set:
-                        with open(root_dir + 'agqa_annotations/train_balanced.json', 'rb') as f:
+                        with open('/kaggle/input/agqa-03-02-2024/train and val/train_balanced.json', 'rb') as f:
                             self.data = pickle.load(f)
                             f.close()
 
@@ -85,7 +85,7 @@ class AGQADataset:
 
 
                 elif split == 'valid':
-                    with open(root_dir + 'agqa_annotations/valid_balanced.json', 'rb') as f:
+                    with open('/kaggle/input/agqa-03-02-2024/train and val/valid_balanced.json', 'rb') as f:
                         self.data = pickle.load(f)
                         f.close()
 
