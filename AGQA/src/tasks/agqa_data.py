@@ -99,7 +99,7 @@ class AGQADataset:
 
 
             # load answer vocab
-            self.answerVocab = get_answer_vocab('/kaggle/working/annotations/trainVal_vocab.json')
+            self.answerVocab = get_answer_vocab('/kaggle/working/annotations/agqa_annotations/trainVal_vocab.json')
 
 
 
