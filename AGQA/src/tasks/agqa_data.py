@@ -31,7 +31,7 @@ class AGQADataset:
         # path configs
 
         # todo: Plase replace following data path to your local path
-        root_dir = '//'
+        root_dir = '/kaggle/working/annotations'
         annotation_dir = root_dir + '/'
 
         self.num_rel = 8
