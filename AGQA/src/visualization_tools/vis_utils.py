@@ -216,7 +216,7 @@ def get_vocab(label_dir):
 
 def get_act_cls(label_dir):
     dict = {}
-    with open("/kaggle/working/annotations/agqa_annotations/action_classes.txt") as f:
+    with open("/kaggle/working/annotations/action_classes.txt") as f:
         lines = f.readlines()
         for line in lines:
             tag = line[0:4]
