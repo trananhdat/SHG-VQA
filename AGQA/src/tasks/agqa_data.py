@@ -166,7 +166,7 @@ class AGQATorchDataset(Dataset):
         #todo: REPLACE WITH YOUR DIRECTORIES
         root_dir = '/'
         self.annotation_dir = root_dir + '/'
-        self.video_dir = '/datasets/Charades/data/Charades_v1_480'
+        self.video_dir = '/kaggle/input/charades/Charades_v1_480'
         self.frame_dir = '/datasets/ActionGenome/dataset/ag/frames'
 
         self.clip_len = 16
