@@ -207,9 +207,13 @@ class AGQATorchDataset(Dataset):
             trimmed_frame_ids = self.frame_ids[vid_id]
             select = []
             for i in range(len(trimmed_frame_ids)):
-                frame = cv2.imread(self.frame_dir + '/' + f'{vid_id}.mp4' + '/' + trimmed_frame_ids[i] + '.png')
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                select.append(frame)
+                try:
+                    frame = cv2.imread(self.frame_dir + '/' + f'{vid_id}.mp4' + '/' + trimmed_frame_ids[i] + '.png')
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    select.append(frame)
+                except Exception as e:
+                    print(e)
+                    continue
             frames = torch.as_tensor(np.array(select))
             frames = self.transform.transform(frames)
 
