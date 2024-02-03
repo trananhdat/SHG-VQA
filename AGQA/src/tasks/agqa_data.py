@@ -31,7 +31,7 @@ class AGQADataset:
         # path configs
 
         # todo: Plase replace following data path to your local path
-        root_dir = '/kaggle/working/annotations'
+        root_dir = '/kaggle/working/annotations/'
         annotation_dir = root_dir + '/'
 
         self.num_rel = 8
@@ -64,12 +64,12 @@ class AGQADataset:
             else:
                 if split == 'train':
                     if not args.train_sub_set:
-                        with open(root_dir + 'data/train_balanced.json', 'rb') as f:
+                        with open(root_dir + 'agqa_annotations/train_balanced.json', 'rb') as f:
                             self.data = pickle.load(f)
                             f.close()
 
                     if args.train_sub_set:
-                        with open(root_dir + 'data/new-sub-train.json', 'rb') as f:
+                        with open(root_dir + 'agqa_annotations/new-sub-train.json', 'rb') as f:
                             self.data = pickle.load(f)
                             f.close()
 
@@ -85,7 +85,7 @@ class AGQADataset:
 
 
                 elif split == 'valid':
-                    with open(root_dir + 'data/valid_balanced.json', 'rb') as f:
+                    with open(root_dir + 'agqa_annotations/valid_balanced.json', 'rb') as f:
                         self.data = pickle.load(f)
                         f.close()
 
