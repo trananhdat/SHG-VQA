@@ -448,7 +448,7 @@ class AGQA:
                     break
 
             except Exception as e:
-                print(e)
+                # print(e)
                 continue
             # with open(self.output + "/log.log", 'a') as f:
             #     f.write(log_str)
