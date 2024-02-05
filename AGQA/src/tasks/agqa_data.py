@@ -208,15 +208,19 @@ class AGQATorchDataset(Dataset):
             select = []
             for i in range(len(trimmed_frame_ids)):
                 try:
-                    frame = cv2.imread(self.frame_dir + '/' + f'{vid_id}.mp4' + '/' + trimmed_frame_ids[i] + '.png')
+                    # frame = cv2.imread(self.frame_dir + '/' + f'{vid_id}.mp4' + '/' + trimmed_frame_ids[i] + '.png')
+                    # Kiểm tra xem file tồn tại hay không
+                    file_path = os.path.join(self.frame_dir, f"{vid_id}.mp4", f"{trimmed_frame_ids[i]}.png")
+                    if os.path.exists(file_path):
+                        # Đọc file nếu tồn tại
+                        frame = cv2.imread(file_path)
+                    else:
+                        continue
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    select.append(frame)
                 except Exception as e:
                     # print(e)
                     continue
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    select.append(frame)
-                # except Exception as e:
-                #     # print(e)
-                #     continue
             frames = torch.as_tensor(np.array(select))
             frames = self.transform.transform(frames)
 
