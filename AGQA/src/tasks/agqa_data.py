@@ -212,7 +212,7 @@ class AGQATorchDataset(Dataset):
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     select.append(frame)
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     continue
             frames = torch.as_tensor(np.array(select))
             frames = self.transform.transform(frames)
