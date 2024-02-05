@@ -250,202 +250,206 @@ class AGQA:
 
 
         for epoch in range(args.epochs):
-            quesid2ans = {}
-
-            if early_stopping_index < STOP_AFTER:  # if validation hasn't changed for 10 epochs, stop
-
-                for i, (ques_id, vid_id, feats, boxes, sent, rel_triplets, lengths, act_tokens, hg_mask,
-                         act_lengths, target) in iter_wrapper(enumerate(loader)):
-
-                    # if i < (SET_ITERATIONS/args.batch_size):
-
-                    self.model.train()
-                    self.model.module.vid_encoder.eval()
-                    self.optim.zero_grad(set_to_none=True)
-
-                    train_features = convert_sents_to_features(
-                        sent, self.max_seq_length, self.tokenizer)
-
-                    # process relation triplets
-                    rel_features = convert_relations_to_features(rel_triplets, num_rel=self.num_rel,
-                                                                 num_situations=self.num_situations, lengths=lengths,
-                                                                 loss_hg_per_frame=args.loss_hg_per_frame)
-
-                    rel_feat_tgt_mask = torch.as_tensor(
-                        generate_rel_target_mask(num_situations=self.num_situations, num_rel=self.num_rel))
-
-                    rel_input_ids = torch.as_tensor(np.array([f.input_ids for f in rel_features]), dtype=torch.long)
-                    rel_segment_ids = torch.as_tensor(np.array([f.segment_ids for f in rel_features]), dtype=torch.long)
-                    if args.loss_hg_per_frame:
-                        tgts = [{"labels": f.targets} for f in rel_features]
-                    else:
-                        tgts = [{"labels": torch.tensor(f.targets)} for f in rel_features]
-
-                    # process action labels
-                    act_features = convert_relations_to_features(act_tokens, num_rel=self.num_act,
-                                                                 num_situations=self.num_situations,
-                                                                 lengths=act_lengths,
-                                                                 loss_hg_per_frame=args.loss_hg_per_frame)
-                    act_feat_tgt_mask = torch.as_tensor(
-                        generate_rel_target_mask(num_situations=self.num_situations, num_rel=self.num_act))
-
-                    act_input_ids = torch.as_tensor(np.array([f.input_ids for f in act_features]), dtype=torch.long)
-                    act_segment_ids = torch.as_tensor(np.array([f.segment_ids for f in act_features]), dtype=torch.long)
-                    if args.loss_hg_per_frame:
-                        act_tgts = [{"labels": f.targets} for f in act_features]
-                    else:
-                        act_tgts = [{"labels": torch.tensor(f.targets)} for f in act_features]
-
-                    # process question features
-                    input_ids = torch.as_tensor(np.array([f.input_ids for f in train_features]), dtype=torch.long)
-                    input_mask = torch.as_tensor(np.array([f.input_mask for f in train_features]), dtype=torch.long)
-                    segment_ids = torch.as_tensor(np.array([f.segment_ids for f in train_features]), dtype=torch.long)
-
+            try:
+                quesid2ans = {}
+    
+                if early_stopping_index < STOP_AFTER:  # if validation hasn't changed for 10 epochs, stop
+    
+                    for i, (ques_id, vid_id, feats, boxes, sent, rel_triplets, lengths, act_tokens, hg_mask,
+                             act_lengths, target) in iter_wrapper(enumerate(loader)):
+    
+                        # if i < (SET_ITERATIONS/args.batch_size):
+    
+                        self.model.train()
+                        self.model.module.vid_encoder.eval()
+                        self.optim.zero_grad(set_to_none=True)
+    
+                        train_features = convert_sents_to_features(
+                            sent, self.max_seq_length, self.tokenizer)
+    
+                        # process relation triplets
+                        rel_features = convert_relations_to_features(rel_triplets, num_rel=self.num_rel,
+                                                                     num_situations=self.num_situations, lengths=lengths,
+                                                                     loss_hg_per_frame=args.loss_hg_per_frame)
+    
+                        rel_feat_tgt_mask = torch.as_tensor(
+                            generate_rel_target_mask(num_situations=self.num_situations, num_rel=self.num_rel))
+    
+                        rel_input_ids = torch.as_tensor(np.array([f.input_ids for f in rel_features]), dtype=torch.long)
+                        rel_segment_ids = torch.as_tensor(np.array([f.segment_ids for f in rel_features]), dtype=torch.long)
+                        if args.loss_hg_per_frame:
+                            tgts = [{"labels": f.targets} for f in rel_features]
+                        else:
+                            tgts = [{"labels": torch.tensor(f.targets)} for f in rel_features]
+    
+                        # process action labels
+                        act_features = convert_relations_to_features(act_tokens, num_rel=self.num_act,
+                                                                     num_situations=self.num_situations,
+                                                                     lengths=act_lengths,
+                                                                     loss_hg_per_frame=args.loss_hg_per_frame)
+                        act_feat_tgt_mask = torch.as_tensor(
+                            generate_rel_target_mask(num_situations=self.num_situations, num_rel=self.num_act))
+    
+                        act_input_ids = torch.as_tensor(np.array([f.input_ids for f in act_features]), dtype=torch.long)
+                        act_segment_ids = torch.as_tensor(np.array([f.segment_ids for f in act_features]), dtype=torch.long)
+                        if args.loss_hg_per_frame:
+                            act_tgts = [{"labels": f.targets} for f in act_features]
+                        else:
+                            act_tgts = [{"labels": torch.tensor(f.targets)} for f in act_features]
+    
+                        # process question features
+                        input_ids = torch.as_tensor(np.array([f.input_ids for f in train_features]), dtype=torch.long)
+                        input_mask = torch.as_tensor(np.array([f.input_mask for f in train_features]), dtype=torch.long)
+                        segment_ids = torch.as_tensor(np.array([f.segment_ids for f in train_features]), dtype=torch.long)
+    
+                        if torch.cuda.is_available():
+                            feats, boxes, target = feats.cuda(), boxes.cuda(), target.cuda()
+                            input_ids, input_mask, segment_ids = input_ids.cuda(), input_mask.cuda(), segment_ids.cuda()
+                            rel_input_ids, rel_segment_ids, rel_feat_tgt_mask = rel_input_ids.cuda(), rel_segment_ids.cuda(), rel_feat_tgt_mask.cuda()
+                            hg_mask = hg_mask.cuda()
+                            if args.loss_hg_per_frame:
+                                tgts = [{"labels": [g.cuda() for g in f.targets]} for f in rel_features]
+                            else:
+                                tgts = [{"labels": torch.tensor(f.targets).cuda()} for f in rel_features]
+    
+                            act_input_ids, act_segment_ids, act_feat_tgt_mask = act_input_ids.cuda(), act_segment_ids.cuda(), act_feat_tgt_mask.cuda()
+                            if args.loss_hg_per_frame:
+                                act_tgts = [{"labels": [g.cuda() for g in f.targets]} for f in act_features]
+                            else:
+                                act_tgts = [{"labels": torch.tensor(f.targets).cuda()} for f in act_features]
+    
+                        if args.gt_hg:
+                            rel_tgt_ids = rel_input_ids
+                            act_tgt_ids = act_input_ids
+                        else:
+                            rel_tgt_ids, act_tgt_ids = None, None
+    
+                        logit, rel_logit, act_logit, hg_logit, attn_probs = self.model(feats, boxes, input_ids=input_ids,
+                                                                                       input_masks=input_mask,
+                                                                                       segment_ids=segment_ids,
+                                                                                       rel_segment_ids=rel_segment_ids,
+                                                                                       rel_tgt_mask=rel_feat_tgt_mask,
+                                                                                       act_segment_ids=act_segment_ids,
+                                                                                       act_tgt_mask=act_feat_tgt_mask,
+                                                                                       hg_mask=hg_mask,
+                                                                                       rel_tgt_ids=rel_tgt_ids,
+                                                                                       act_tgt_ids=act_tgt_ids)
+    
+                        assert logit.dim() == target.dim() == 2
+                        losses = ()
+                        total_loss = 0.
+                        vqa_loss_str = ""
+                        hgqa_loss_str = ""
+                        hg_loss_str = ""
+    
+                        hgqa_loss = self.bce_loss(hg_logit, target)
+                        hgqa_loss = hgqa_loss * hg_logit.size(1)
+                        total_loss += hgqa_loss
+                        losses += (hgqa_loss.detach(),)
+                        hgqa_loss_str = "\tHGQA loss= %0.4f" % hgqa_loss.detach().item()
+    
+                        if not args.gt_hg:
+                            # compute hungarian matching loss between predicted relation and target relations
+                            # Retrieve the matching between the outputs of the last layer and the targets
+                            indices = self.matcher({'pred_logits': rel_logit}, tgts,
+                                                   )
+                            rel_loss = self.loss_labels({'pred_logits': rel_logit}, tgts, indices,
+                                                        empty_weight=self.empty_weight,
+                                                        loss_hg_per_frame=args.loss_hg_per_frame)
+    
+                            # compute hungarian matching loss between predicted actions and target actions
+                            # Retrieve the matching between the outputs of the last layer and the targets
+                            act_indices = self.matcher({'pred_logits': act_logit}, act_tgts)
+                            act_loss = self.loss_labels({'pred_logits': act_logit}, act_tgts, act_indices,
+                                                        empty_weight=self.empty_weight_acts,
+                                                        loss_hg_per_frame=args.loss_hg_per_frame)
+    
+                            # add relation loss
+                            for los, loss_value in rel_loss.items():
+                                if los in self.weight_dict:
+                                    los_w = self.weight_dict[los] * loss_value
+                                    total_loss += los_w
+                                    losses += (los_w.detach(),)
+    
+                            # add action loss
+                            for los, loss_value in act_loss.items():
+                                if los in self.weight_dict:
+                                    los_w = self.weight_dict[los] * loss_value
+                                    total_loss += los_w
+                                    losses += (los_w.detach(),)
+    
+                            hg_loss_str = "\tRel loss= %0.4f \tAct loss= %0.4f\n" \
+                                          "Rel class error= %0.4f \t Act class error= %0.4f\n" % (
+                                              rel_loss["loss_ce"].detach(), act_loss["loss_ce"].detach(),
+                                              rel_loss["class_error"].detach(), act_loss["class_error"].detach())
+    
+                        if i % args.log_freq == 0:
+                            log_loss = "\nEpoch %d: Total loss= %0.4f " % (epoch, total_loss.detach())
+                            log_loss += vqa_loss_str + hgqa_loss_str + hg_loss_str
+                            print(log_loss, flush=True)
+    
+                        total_loss.backward()
+                        nn.utils.clip_grad_norm_(self.model.parameters(), 5.)
+                        self.optim.step()
+    
+                        score, label = hg_logit.max(1)
+                        for qid, l in zip(ques_id, label.cpu().numpy()):
+                            # ans = dset.label2ans[l]
+                            ans = l
+                            quesid2ans[qid] = ans
+    
+    
+    
+                    log_str = "\nEpoch %d: Train %0.2f\n" % (epoch, evaluator.evaluateOverall(quesid2ans) * 100.)
+                    # if (self.valid_tuple == None):
+                    #     self.save("CURRENT")
+                    self.save("CURRENT")
+    
+                    # to handle GPU OOM error
                     if torch.cuda.is_available():
-                        feats, boxes, target = feats.cuda(), boxes.cuda(), target.cuda()
-                        input_ids, input_mask, segment_ids = input_ids.cuda(), input_mask.cuda(), segment_ids.cuda()
-                        rel_input_ids, rel_segment_ids, rel_feat_tgt_mask = rel_input_ids.cuda(), rel_segment_ids.cuda(), rel_feat_tgt_mask.cuda()
-                        hg_mask = hg_mask.cuda()
-                        if args.loss_hg_per_frame:
-                            tgts = [{"labels": [g.cuda() for g in f.targets]} for f in rel_features]
+                        # gc.collect()
+                        torch.cuda.empty_cache()
+    
+    
+                    if self.valid_tuple is not None:  # Do Validation
+                        if not self.task_q and not self.task_vqa:
+                            valid_score, hg_score = self.evaluate(eval_tuple) #todo: keep best model based on hg_score
+                            if (self.task_hgqa or self.task_vhga) and not self.task_vqa:
+                                if hg_score > best_valid:
+                                    best_valid = hg_score
+                                    self.save("BEST")
+                            log_str += "Epoch %d: Valid %0.2f \t HG %0.2f\n" % (epoch, valid_score * 100., hg_score * 100.) + \
+                                       "Epoch %d: Best %0.2f\n" % (epoch, best_valid * 100.)
+    
                         else:
-                            tgts = [{"labels": torch.tensor(f.targets).cuda()} for f in rel_features]
-
-                        act_input_ids, act_segment_ids, act_feat_tgt_mask = act_input_ids.cuda(), act_segment_ids.cuda(), act_feat_tgt_mask.cuda()
-                        if args.loss_hg_per_frame:
-                            act_tgts = [{"labels": [g.cuda() for g in f.targets]} for f in act_features]
-                        else:
-                            act_tgts = [{"labels": torch.tensor(f.targets).cuda()} for f in act_features]
-
-                    if args.gt_hg:
-                        rel_tgt_ids = rel_input_ids
-                        act_tgt_ids = act_input_ids
-                    else:
-                        rel_tgt_ids, act_tgt_ids = None, None
-
-                    logit, rel_logit, act_logit, hg_logit, attn_probs = self.model(feats, boxes, input_ids=input_ids,
-                                                                                   input_masks=input_mask,
-                                                                                   segment_ids=segment_ids,
-                                                                                   rel_segment_ids=rel_segment_ids,
-                                                                                   rel_tgt_mask=rel_feat_tgt_mask,
-                                                                                   act_segment_ids=act_segment_ids,
-                                                                                   act_tgt_mask=act_feat_tgt_mask,
-                                                                                   hg_mask=hg_mask,
-                                                                                   rel_tgt_ids=rel_tgt_ids,
-                                                                                   act_tgt_ids=act_tgt_ids)
-
-                    assert logit.dim() == target.dim() == 2
-                    losses = ()
-                    total_loss = 0.
-                    vqa_loss_str = ""
-                    hgqa_loss_str = ""
-                    hg_loss_str = ""
-
-                    hgqa_loss = self.bce_loss(hg_logit, target)
-                    hgqa_loss = hgqa_loss * hg_logit.size(1)
-                    total_loss += hgqa_loss
-                    losses += (hgqa_loss.detach(),)
-                    hgqa_loss_str = "\tHGQA loss= %0.4f" % hgqa_loss.detach().item()
-
-                    if not args.gt_hg:
-                        # compute hungarian matching loss between predicted relation and target relations
-                        # Retrieve the matching between the outputs of the last layer and the targets
-                        indices = self.matcher({'pred_logits': rel_logit}, tgts,
-                                               )
-                        rel_loss = self.loss_labels({'pred_logits': rel_logit}, tgts, indices,
-                                                    empty_weight=self.empty_weight,
-                                                    loss_hg_per_frame=args.loss_hg_per_frame)
-
-                        # compute hungarian matching loss between predicted actions and target actions
-                        # Retrieve the matching between the outputs of the last layer and the targets
-                        act_indices = self.matcher({'pred_logits': act_logit}, act_tgts)
-                        act_loss = self.loss_labels({'pred_logits': act_logit}, act_tgts, act_indices,
-                                                    empty_weight=self.empty_weight_acts,
-                                                    loss_hg_per_frame=args.loss_hg_per_frame)
-
-                        # add relation loss
-                        for los, loss_value in rel_loss.items():
-                            if los in self.weight_dict:
-                                los_w = self.weight_dict[los] * loss_value
-                                total_loss += los_w
-                                losses += (los_w.detach(),)
-
-                        # add action loss
-                        for los, loss_value in act_loss.items():
-                            if los in self.weight_dict:
-                                los_w = self.weight_dict[los] * loss_value
-                                total_loss += los_w
-                                losses += (los_w.detach(),)
-
-                        hg_loss_str = "\tRel loss= %0.4f \tAct loss= %0.4f\n" \
-                                      "Rel class error= %0.4f \t Act class error= %0.4f\n" % (
-                                          rel_loss["loss_ce"].detach(), act_loss["loss_ce"].detach(),
-                                          rel_loss["class_error"].detach(), act_loss["class_error"].detach())
-
-                    if i % args.log_freq == 0:
-                        log_loss = "\nEpoch %d: Total loss= %0.4f " % (epoch, total_loss.detach())
-                        log_loss += vqa_loss_str + hgqa_loss_str + hg_loss_str
-                        print(log_loss, flush=True)
-
-                    total_loss.backward()
-                    nn.utils.clip_grad_norm_(self.model.parameters(), 5.)
-                    self.optim.step()
-
-                    score, label = hg_logit.max(1)
-                    for qid, l in zip(ques_id, label.cpu().numpy()):
-                        # ans = dset.label2ans[l]
-                        ans = l
-                        quesid2ans[qid] = ans
-
-
-
-                log_str = "\nEpoch %d: Train %0.2f\n" % (epoch, evaluator.evaluateOverall(quesid2ans) * 100.)
-                # if (self.valid_tuple == None):
-                #     self.save("CURRENT")
-                self.save("CURRENT")
-
-                # to handle GPU OOM error
-                if torch.cuda.is_available():
-                    # gc.collect()
-                    torch.cuda.empty_cache()
-
-
-                if self.valid_tuple is not None:  # Do Validation
-                    if not self.task_q and not self.task_vqa:
-                        valid_score, hg_score = self.evaluate(eval_tuple) #todo: keep best model based on hg_score
-                        if (self.task_hgqa or self.task_vhga) and not self.task_vqa:
-                            if hg_score > best_valid:
-                                best_valid = hg_score
+                            valid_score = self.evaluate(eval_tuple)
+                            if valid_score > best_valid:
+                                best_valid = valid_score
                                 self.save("BEST")
-                        log_str += "Epoch %d: Valid %0.2f \t HG %0.2f\n" % (epoch, valid_score * 100., hg_score * 100.) + \
-                                   "Epoch %d: Best %0.2f\n" % (epoch, best_valid * 100.)
-
+    
+                            log_str += "Epoch %d: Valid %0.2f\n" % (epoch, valid_score * 100.) + \
+                                       "Epoch %d: Best %0.2f\n" % (epoch, best_valid * 100.)
+    
+    
+                    print(log_str, end='', flush=True)
+    
+                    if self.valid_tuple is not None:
+                        if (hg_score < best_valid):
+                            early_stopping_index += 1
+                        else:
+                            early_stopping_index = 0
+    
                     else:
-                        valid_score = self.evaluate(eval_tuple)
-                        if valid_score > best_valid:
-                            best_valid = valid_score
-                            self.save("BEST")
-
-                        log_str += "Epoch %d: Valid %0.2f\n" % (epoch, valid_score * 100.) + \
-                                   "Epoch %d: Best %0.2f\n" % (epoch, best_valid * 100.)
-
-
-                print(log_str, end='', flush=True)
-
-                if self.valid_tuple is not None:
-                    if (hg_score < best_valid):
                         early_stopping_index += 1
-                    else:
-                        early_stopping_index = 0
-
+    
+    
                 else:
-                    early_stopping_index += 1
+                    print("Stopping Early...", flush=True)
+                    break
 
-
-            else:
-                print("Stopping Early...", flush=True)
-                break
-
+            except Exception as e:
+                print(e)
+                continue
             # with open(self.output + "/log.log", 'a') as f:
             #     f.write(log_str)
             #     f.flush()
