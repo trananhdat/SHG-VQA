@@ -106,7 +106,7 @@ class AGQADataset:
 
         print("Load %d data from split(s) %s." % (len(self.data), self.name))
 
-        rel_triplet_path = os.path.join(annotation_dir, 'relationship_triplets.json')
+        rel_triplet_path = os.path.join('/kaggle/working/annotations/agqa_annotations', 'relationship_triplets.json')
         if os.path.isfile(rel_triplet_path):
             self.rel_triplets_data = src.utils.load_pickle(rel_triplet_path)
         else:
@@ -114,7 +114,7 @@ class AGQADataset:
 
 
         # load action dictionary
-        act_path = os.path.join(annotation_dir, 'action_dictionaries.json')
+        act_path = os.path.join('/kaggle/working/annotations/agqa_annotations', 'action_dictionaries.json')
         if os.path.isfile(act_path):
             self.action_data = src.utils.load_pickle(act_path)
         else:
