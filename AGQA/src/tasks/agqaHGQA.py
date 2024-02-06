@@ -253,7 +253,8 @@ class AGQA:
             try:
                 quesid2ans = {}
     
-                if early_stopping_index < STOP_AFTER:  # if validation hasn't changed for 10 epochs, stop
+                # if early_stopping_index < STOP_AFTER:  # if validation hasn't changed for 10 epochs, stop
+                if True:
     
                     for i, (ques_id, vid_id, feats, boxes, sent, rel_triplets, lengths, act_tokens, hg_mask,
                              act_lengths, target) in iter_wrapper(enumerate(loader)):
