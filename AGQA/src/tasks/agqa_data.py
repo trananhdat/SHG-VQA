@@ -167,7 +167,7 @@ class AGQATorchDataset(Dataset):
         root_dir = '/'
         self.annotation_dir = root_dir + '/'
         self.video_dir = '/kaggle/input/charades/Charades_v1_480'
-        self.frame_dir = '/kaggle/input/actiongenome/kaggle/working/frames'
+        self.frame_dir = '/kaggle/input/charades-rgb/Charades_v1_rgb'
 
         self.clip_len = 16
         self.num_rel = 8
@@ -210,7 +210,8 @@ class AGQATorchDataset(Dataset):
                 try:
                     # frame = cv2.imread(self.frame_dir + '/' + f'{vid_id}.mp4' + '/' + trimmed_frame_ids[i] + '.png')
                     # Kiểm tra xem file tồn tại hay không
-                    file_path = os.path.join(self.frame_dir, f"{vid_id}.mp4", f"{trimmed_frame_ids[i]}.png")
+                    # file_path = os.path.join(self.frame_dir, f"{vid_id}.mp4", f"{trimmed_frame_ids[i]}.png")
+                    file_path = os.path.join(self.frame_dir, f"{vid_id}", f"{trimmed_frame_ids[i]}.jpg")
                     if os.path.exists(file_path):
                         # Đọc file nếu tồn tại
                         frame = cv2.imread(file_path)
